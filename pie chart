@@ -1,0 +1,14 @@
+app.get('/pie-chart', async (req, res) => {
+    const { month } = req.query;
+
+    try {
+        const items = await Product.aggregate([
+            { $match: { dateOfSale: { $regex: `-${month}-`, $options: 'i' } } },
+            { $group: { _id: '$category', count: { $sum: 1 } } }
+        ]);
+
+        res.json(items);
+    } catch (error) {
+        res.status(500).send('Error fetching pie chart data');
+    }
+});

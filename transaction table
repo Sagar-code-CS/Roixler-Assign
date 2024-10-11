@@ -1,0 +1,78 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const TransactionsTable = () => {
+    const [transactions, setTransactions] = useState([]);
+    const [search, setSearch] = useState('');
+    const [month, setMonth] = useState('March'); 
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1); 
+
+    
+    const fetchTransactions = () => {
+        axios.get(`/transactions?month=${month}&page=${page}&search=${search}`)
+            .then(res => {
+                setTransactions(res.data.transactions); /
+                setTotalPages(res.data.totalPages);      /
+            .catch(err => console.error(err));
+    };
+
+   
+    useEffect(() => {
+        fetchTransactions();
+    }, [search, month, page]);
+
+    return (
+        <div>
+            {/* Search Input */}
+            <input 
+                type="text" 
+                placeholder="Search transactions..." 
+                value={search}
+                onChange={e => setSearch(e.target.value)} 
+            />
+
+            {/* Month Dropdown */}
+            <select onChange={e => setMonth(e.target.value)} value={month}>
+                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                ))}
+            </select>
+
+            {/* Transactions Table */}
+            <table>
+                <thead>
+                    <tr><th>Title</th><th>Description</th><th>Price</th></tr>
+                </thead>
+                <tbody>
+                    {transactions.length > 0 ? transactions.map(t => (
+                        <tr key={t._id}>
+                            <td>{t.title}</td>
+                            <td>{t.description}</td>
+                            <td>{t.price}</td>
+                        </tr>
+                    )) : <tr><td colSpan="3">No transactions found</td></tr>}
+                </tbody>
+            </table>
+
+            {}
+            <div>
+                <button 
+                    onClick={() => setPage(page - 1)} 
+                    disabled={page === 1} 
+                >
+                    Previous
+                </button>
+                <button 
+                    onClick={() => setPage(page + 1)} 
+                    disabled={page === totalPages} 
+                >
+                    Next
+                </button>
+                <p>Page {page} of {totalPages}</p>
+            </div>
+        </div>
+    );
+};
+
+export default TransactionsTable;

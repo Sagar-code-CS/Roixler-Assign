@@ -1,0 +1,14 @@
+app.get('/combined-data', async (req, res) => {
+    const { month } = req.query;
+    
+    try {
+        const transactions = await Product.find({ dateOfSale: { $regex: `-${month}-`, $options: 'i' } });
+        const statistics = await axios.get(`/statistics?month=${month}`);
+        const barChart = await axios.get(`/bar-chart?month=${month}`);
+        const pieChart = await axios.get(`/pie-chart?month=${month}`);
+
+        res.json({ transactions, statistics: statistics.data, barChart: barChart.data, pieChart: pieChart.data });
+    } catch (error) {
+        res.status(500).send('Error fetching combined data');
+    }
+});
